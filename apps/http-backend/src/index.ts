@@ -13,7 +13,6 @@ app.post("/signup",(req , res) => {
     return res.json({
       message : "Incoreect Inputs"
     })
-    return ;
   }
   res.json({
     userId : 123
@@ -27,7 +26,6 @@ app.post("/signin",(req , res) => {
     return res.json({
       message : "Incoreect Inputs"
     })
-    return ;
   }
 
   const userId = 1;
@@ -46,7 +44,6 @@ app.post("/room", middleware , (req , res) => {
     return res.json({
       message : "Incoreect Inputs"
     })
-    return ;
   }
   res.json({
     roomId : 1
