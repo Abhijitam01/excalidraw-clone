@@ -1,16 +1,11 @@
 import dotenv from "dotenv";
-import path from "path";
-
-// Load .env from project root
-// Try multiple possible locations for .env file
+import path, { parse } from "path";
 const possibleEnvPaths = [
   path.resolve(process.cwd(), ".env"),           // Current directory
   path.resolve(process.cwd(), "../.env"),        // One level up
   path.resolve(process.cwd(), "../../.env"),     // Two levels up (project root)
   path.resolve(process.cwd(), "../../../.env"),   // Three levels up
 ];
-
-// Try each path until one works
 for (const envPath of possibleEnvPaths) {
   const result = dotenv.config({ path: envPath });
   if (!result.error) {
@@ -31,8 +26,6 @@ import { prismaClient } from "@repo/db/client" ;
 
 const app = express();
 app.use(express.json())
-
-// Debug: Log DATABASE_URL status on startup (without exposing the full URL)
 if (process.env.DATABASE_URL) {
   console.log("✓ DATABASE_URL is set");
 } else {
@@ -63,48 +56,75 @@ app.post("/signup",async (req , res) => {
   }) 
  } catch(e: any){
     console.error("Signup error:", e);
-    // Check if it's a unique constraint violation (email already exists)
     if (e.code === 'P2002' || e.message?.includes('Unique constraint')) {
       return res.status(409).json({
         message : "Email already exists"
       })
     }
-    // Generic database error
     return res.status(500).json({
       message : "Database error",
       error: process.env.NODE_ENV === 'development' ? e.message : undefined
     })
   }
  })
-app.post("/signin",(req , res) => {
+app.post("/signin",async (req , res) => {
 
-  const data = SigninSchema.safeParse(req.body);
-  if(!data.success){
+  const parsedData = SigninSchema.safeParse(req.body);
+  if(!parsedData.success){
     return res.status(400).json({
       message : "Incorrect Inputs"
     })
   }
 
-  const userId = 1;
+  const user = await prismaClient.user.findFirst({
+    where:{
+      email : parsedData.data?.username ,
+      password : parsedData.data?.password
+    }
+  })
+
+  if (!user) {
+    res.status(403).json({
+      message : "not authorised"
+    })
+    return ;
+  }
   const token = jwt.sign({
-    userId
+    userId : user?.id
   } , JWT_SECRET) ;
 
   res.json({
     token
   })
 })
-app.post("/room", middleware , (req , res) => {
+app.post("/room", middleware ,async  (req , res) => {
 
-  const data = CreateRoomSchema.safeParse(req.body);
-  if(!data.success){
+  const parsedData = CreateRoomSchema.safeParse(req.body);
+  if(!parsedData.success){
     return res.status(400).json({
       message : "Incorrect Inputs"
     })
+    return 
   }
-  res.json({
-    roomId : 1
+
+  const userId = req.userId ;
+  
+  try {
+
+  const room = await prismaClient.room.create({
+    data : {
+      slug : parsedData.data.name ,
+      adminId : userId
+    }
   })
+  res.json({
+    roomId : room.id
+  })
+  } catch(e) {
+    res.status(411).json({
+      message : "room exist with this endpoint"
+        })
+  }
 
 })
 
