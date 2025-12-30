@@ -1,16 +1,6 @@
 # ============================================
-# Shared Apps .gitignore
+# TypeScript Config Package .gitignore
 # ============================================
-# Common patterns for all apps in the monorepo
-# App-specific patterns should be in individual app directories
-
-# ============================================
-# Build Outputs
-# ============================================
-dist/
-build/
-out/
-*.tsbuildinfo
 
 # ============================================
 # Dependencies
@@ -18,11 +8,12 @@ out/
 node_modules/
 
 # ============================================
-# Environment
+# Environment Variables
 # ============================================
 .env
+.env.*
+!.env.example
 .env.local
-.env.*.local
 
 # ============================================
 # Logs
@@ -32,4 +23,19 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+
+# ============================================
+# IDE
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ============================================
+# OS
+# ============================================
+.DS_Store
+Thumbs.db
 
