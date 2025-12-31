@@ -1,18 +1,10 @@
 import dotenv from "dotenv";
 import path, { parse } from "path";
-const possibleEnvPaths = [
-  path.resolve(process.cwd(), ".env"),           // Current directory
-  path.resolve(process.cwd(), "../.env"),        // One level up
-  path.resolve(process.cwd(), "../../.env"),     // Two levels up (project root)
-  path.resolve(process.cwd(), "../../../.env"),   // Three levels up
-];
-for (const envPath of possibleEnvPaths) {
-  const result = dotenv.config({ path: envPath });
-  if (!result.error) {
-    console.log(`Loaded .env from: ${envPath}`);
-    break;
-  }
-}
+
+
+!dotenv.config({ path: path.resolve(process.cwd(), '../../.env') }).error &&
+console.log(`Loaded .env from: ${path.resolve(process.cwd(), '../../.env')}`);
+
 
 import express from 'express';
 import jwt from 'jsonwebtoken';
@@ -21,11 +13,10 @@ import { middleware } from './middleware';
 import { CreateUserSchema , SigninSchema , CreateRoomSchema} from "@repo/common/types"
 import { prismaClient } from "@repo/db/client" ;
 
-
-
-
 const app = express();
 app.use(express.json())
+
+                                                                                                                                              
 if (process.env.DATABASE_URL) {
   console.log("✓ DATABASE_URL is set");
 } else {
@@ -126,6 +117,24 @@ app.post("/room", middleware ,async  (req , res) => {
         })
   }
 
+})
+
+app.get("/chats/:roomId" ,async  (req , res) => {
+  const roomId = parseInt(req.params.roomId) ;
+  const messages = await prismaClient.chat.findMany({
+    where : {
+      roomId: roomId
+    },
+    orderBy : {
+      id:"desc"
+
+    } ,
+    take : 50
+  }) ;
+
+  res.json({
+    messages
+  })
 })
 
 const PORT = Number(process.env.PORT) || 3001;
