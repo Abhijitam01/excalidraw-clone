@@ -1,3 +1,37 @@
 {
-  "pages": {}
+  "pages": {
+    "/_not-found/page": [
+      "static/chunks/4b063_next_dist_1e153297._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_favicon_ico_mjs_e7be419f._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_c174cd51._.css",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_layout_tsx_2896100e._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_13cc9156._.js",
+      "static/chunks/4b063_next_dist_compiled_react-dom_05e89a53._.js",
+      "static/chunks/4b063_next_dist_compiled_next-devtools_index_ff76e8a2.js",
+      "static/chunks/4b063_next_dist_compiled_b336b29f._.js",
+      "static/chunks/4b063_next_dist_client_76184e82._.js",
+      "static/chunks/4b063_next_dist_9ba0f1bd._.js",
+      "static/chunks/3ed37_@swc_helpers_cjs_affd883d._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_a0ff3932._.js",
+      "static/chunks/turbopack-Desktop_excalidraw_app_apps_web_4b9b605d._.js"
+    ],
+    "/page": [
+      "static/chunks/4b063_next_dist_1e153297._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_favicon_ico_mjs_e7be419f._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_c174cd51._.css",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_layout_tsx_2896100e._.js",
+      "static/chunks/4b063_next_dist_client_components_builtin_global-error_16c57a72.js",
+      "static/chunks/Desktop_excalidraw_app_88d6b887._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_app_page_tsx_16c57a72._.js",
+      "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_13cc9156._.js",
+      "static/chunks/4b063_next_dist_compiled_react-dom_05e89a53._.js",
+      "static/chunks/4b063_next_dist_compiled_next-devtools_index_ff76e8a2.js",
+      "static/chunks/4b063_next_dist_compiled_b336b29f._.js",
+      "static/chunks/4b063_next_dist_client_76184e82._.js",
+      "static/chunks/4b063_next_dist_9ba0f1bd._.js",
+      "static/chunks/3ed37_@swc_helpers_cjs_affd883d._.js",
+      "static/chunks/Desktop_excalidraw_app_apps_web_a0ff3932._.js",
+      "static/chunks/turbopack-Desktop_excalidraw_app_apps_web_4b9b605d._.js"
+    ]
+  }
 }
