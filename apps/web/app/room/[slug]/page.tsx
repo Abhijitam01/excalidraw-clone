@@ -3,7 +3,7 @@ import { BACKEND_URL } from "../../config";
 
 async function getRoomId(slug:string){
   const response =   axios.get(`${BACKEND_URL}/room/${slug}`)
-  return (await response).data.id ;
+  return (await response).data.room.id ;
 }
 
 export default async function ChatRoom({
@@ -13,7 +13,9 @@ export default async function ChatRoom({
         slug : string
     }
 }) {
-    const slug = params.slug;
+    const slug = (await params).slug;
     const roomId = await getRoomId(slug) ;
+
+    return <ChatRoom1 id={roomId}></ChatRoom1>
 
 }
