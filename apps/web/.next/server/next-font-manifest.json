@@ -1,15 +1,6 @@
 {
-  "app": {
-    "[project]/Desktop/excalidraw_app/apps/web/app/_not-found/page": [
-      "static/media/GeistVF-s.p.4c3c0b96.woff",
-      "static/media/GeistMonoVF-s.p.2cee7d16.woff"
-    ],
-    "[project]/Desktop/excalidraw_app/apps/web/app/page": [
-      "static/media/GeistVF-s.p.4c3c0b96.woff",
-      "static/media/GeistMonoVF-s.p.2cee7d16.woff"
-    ]
-  },
-  "appUsingSizeAdjust": true,
+  "app": {},
+  "appUsingSizeAdjust": false,
   "pages": {},
   "pagesUsingSizeAdjust": false
 }

@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand: 220 90% 56%;
+  --brand-foreground: 0 0% 100%;
+  --radius: 0.75rem;
+}

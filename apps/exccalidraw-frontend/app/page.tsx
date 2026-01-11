@@ -55,7 +55,6 @@ export default function Home() {
             <span className="text-zinc-400">•</span>
             <span>hand-drawn diagrams & quick sketches</span>
           </div>
-
           <h1
             className="mt-6 text-balance text-4xl font-semibold leading-tight tracking-tight animate-fade-up sm:text-6xl"
             style={{ animationDelay: "120ms" }}
