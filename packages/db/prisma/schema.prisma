@@ -16,6 +16,7 @@ model User {
   photo     String?
   rooms     Room[]
   chats     Chat[]
+  shapes    Shape[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -28,6 +29,7 @@ model Room {
   adminId   String
   admin     User     @relation(fields: [adminId], references: [id])
   chats     Chat[]
+  shapes    Shape[]
 }
 
 model Chat {
@@ -36,6 +38,18 @@ model Chat {
   message   String
   userId    String
   createdAt DateTime @default(now())
-  room      Room     @relation(fields: [roomId], references: [id])
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Shape {
+  id        String   @id
+  roomId    Int
+  type      String
+  data      Json
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
 }

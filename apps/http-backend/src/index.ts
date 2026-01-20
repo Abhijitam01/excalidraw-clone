@@ -141,6 +141,37 @@ app.get("/rooms", middleware, async (req, res) => {
   }
 });
 
+app.delete("/room/:id", middleware, async (req, res) => {
+  const roomId = parseInt(req.params.id as string);
+  const userId = req.userId;
+
+  try {
+    // Ensure the user is the admin of the room
+    const room = await prismaClient.room.findFirst({
+      where: {
+        id: roomId,
+        adminId: userId,
+      },
+    });
+
+    if (!room) {
+      return res
+        .status(403)
+        .json({ message: "Unauthorized or room not found" });
+    }
+
+    await prismaClient.room.delete({
+      where: {
+        id: roomId,
+      },
+    });
+
+    res.json({ message: "Room deleted successfully" });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to delete room" });
+  }
+});
+
 app.get("/chats/:roomId", async (req, res) => {
   const roomId = parseInt(req.params.roomId);
   const messages = await prismaClient.chat.findMany({
@@ -156,6 +187,20 @@ app.get("/chats/:roomId", async (req, res) => {
   res.json({
     messages,
   });
+});
+
+app.get("/shapes/:roomId", async (req, res) => {
+  const roomId = parseInt(req.params.roomId as string);
+  try {
+    const shapes = await prismaClient.shape.findMany({
+      where: {
+        roomId: roomId,
+      },
+    });
+    res.json({ shapes });
+  } catch (e) {
+    res.status(500).json({ message: "Failed to fetch shapes" });
+  }
 });
 
 app.get("/room/:slug", async (req, res) => {

@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { HTTP_BACKEND } from "@/config";
-import { Plus, Folder, LogOut, User as UserIcon } from "lucide-react";
+import { Plus, Folder, LogOut, User as UserIcon, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 interface Room {
@@ -62,6 +62,20 @@ export default function DashboardPage() {
       console.error("Failed to create room", error);
     } finally {
       setIsCreating(false);
+    }
+  };
+
+  const deleteRoom = async (e: React.MouseEvent, roomId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this room?")) return;
+    try {
+      await axios.delete(`${HTTP_BACKEND}/room/${roomId}`, {
+        headers: { Authorization: token },
+      });
+      setRooms((prev) => prev.filter((r) => r.id !== roomId));
+    } catch (error) {
+      console.error("Failed to delete room", error);
     }
   };
 
@@ -151,11 +165,12 @@ export default function DashboardPage() {
                 <p className="mt-1 text-sm text-zinc-500">
                   Created {new Date(room.createdAt).toLocaleDateString()}
                 </p>
-                <div className="absolute top-6 right-6 opacity-0 transition-opacity group-hover:opacity-100">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-100">
-                    <Plus className="h-4 w-4 rotate-45 text-zinc-900" />
-                  </div>
-                </div>
+                <button
+                  onClick={(e) => deleteRoom(e, room.id)}
+                  className="absolute top-6 right-6 flex h-8 w-8 items-center justify-center rounded-full bg-red-500/10 text-red-500 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-500 hover:text-white"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </Link>
             ))}
           </div>
