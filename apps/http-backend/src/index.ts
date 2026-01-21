@@ -4,6 +4,7 @@ import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
 import express from "express";
+import cors from "cors";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { JWT_SECRET } from "@repo/backend-common/config";
@@ -16,6 +17,15 @@ import {
 import { prismaClient } from "@repo/db/client";
 
 const app = express();
+
+// CORS configuration - allow requests from frontend
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 if (process.env.DATABASE_URL) {
