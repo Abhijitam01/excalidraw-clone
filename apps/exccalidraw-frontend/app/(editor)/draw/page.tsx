@@ -1,14 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { useAuth } from "../context/AuthContext";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useAuth } from "../../context/AuthContext";
 import { HTTP_BACKEND, WS_BACKEND } from "@/config";
 import axios from "axios";
-import { Toolbar, Tool } from "../components/canvas/Toolbar";
-import { ZoomControls } from "../components/canvas/ZoomControls";
-import { MainMenu } from "../components/canvas/MainMenu";
-import { PropertyBar, FillStyle } from "../components/canvas/PropertyBar";
+import { Toolbar, Tool } from "../../components/canvas/Toolbar";
+import { ZoomControls } from "../../components/canvas/ZoomControls";
+import { MainMenu } from "../../components/canvas/MainMenu";
+import { PropertyBar, FillStyle } from "../../components/canvas/PropertyBar";
 import rough from "roughjs";
 import { RoughCanvas } from "roughjs/bin/canvas";
 
@@ -16,7 +16,12 @@ type Point = { x: number; y: number };
 
 type ShapeStyle = {
   stroke: string;
+  backgroundColor: string;
   strokeWidth: number;
+  strokeStyle: "solid" | "dashed" | "dotted";
+  roughness: number;
+  roundness: "sharp" | "round";
+  opacity: number;
   fillStyle: FillStyle;
 };
 
@@ -93,8 +98,66 @@ function DrawContent() {
   const { token } = useAuth();
 
   // Styling state
+  // Styling state
   const [strokeColor, setStrokeColor] = useState("#ECECEC");
+  const [backgroundColor, setBackgroundColor] = useState("transparent");
+  const [strokeWidth, setStrokeWidth] = useState(2);
+  const [strokeStyle, setStrokeStyle] = useState<"solid" | "dashed" | "dotted">(
+    "solid"
+  );
+  const [roughness, setRoughness] = useState(1);
+  const [roundness, setRoundness] = useState<"sharp" | "round">("round");
+  const [opacity, setOpacity] = useState(100);
   const [fillStyle, setFillStyle] = useState<FillStyle>("hachure");
+
+  const router = useRouter();
+
+  // Refs for canvas logic to avoid re-initialization
+  const selectedToolRef = useRef(selectedTool);
+  const zoomRef = useRef(zoom);
+  const cameraRef = useRef(camera);
+  const selectedShapeIdRef = useRef(selectedShapeId);
+
+  const currentStyleRef = useRef<ShapeStyle>({
+    stroke: strokeColor,
+    backgroundColor,
+    strokeWidth,
+    strokeStyle,
+    roughness,
+    roundness,
+    opacity,
+    fillStyle,
+  });
+
+  useEffect(() => {
+    selectedToolRef.current = selectedTool;
+    zoomRef.current = zoom;
+    cameraRef.current = camera;
+    selectedShapeIdRef.current = selectedShapeId;
+    currentStyleRef.current = {
+      stroke: strokeColor,
+      backgroundColor,
+      strokeWidth,
+      strokeStyle,
+      roughness,
+      roundness,
+      opacity,
+      fillStyle,
+    };
+  }, [
+    selectedTool,
+    zoom,
+    camera,
+    selectedShapeId,
+    strokeColor,
+    backgroundColor,
+    strokeWidth,
+    strokeStyle,
+    roughness,
+    roundness,
+    opacity,
+    fillStyle,
+  ]);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -140,10 +203,10 @@ function DrawContent() {
         canvasRef.current,
         roomId,
         socketRef.current,
-        selectedTool,
-        zoom,
-        camera,
-        { stroke: strokeColor, strokeWidth: 2, fillStyle },
+        selectedToolRef,
+        zoomRef,
+        cameraRef,
+        currentStyleRef,
         (newShapes) => {
           setHistory((prev) => [...prev, newShapes]);
           setRedoStack([]);
@@ -154,7 +217,7 @@ function DrawContent() {
           setCamera(newCamera);
         },
         (tool) => setSelectedTool(tool),
-        selectedShapeId,
+        selectedShapeIdRef,
         setSelectedShapeId,
         setCollaborators,
         setOnlineUsers,
@@ -166,16 +229,7 @@ function DrawContent() {
     return () => {
       cleanup?.();
     };
-  }, [
-    selectedTool,
-    zoom,
-    camera,
-    strokeColor,
-    fillStyle,
-    selectedShapeId,
-    roomId,
-    token,
-  ]);
+  }, [roomId, token]);
 
   const undo = () => {
     if (history.length === 0) return;
@@ -198,8 +252,21 @@ function DrawContent() {
       <PropertyBar
         strokeColor={strokeColor}
         setStrokeColor={setStrokeColor}
-        fillStyle={fillStyle}
-        setFillStyle={setFillStyle}
+        backgroundColor={backgroundColor}
+        setBackgroundColor={setBackgroundColor}
+        strokeWidth={strokeWidth}
+        setStrokeWidth={setStrokeWidth}
+        strokeStyle={strokeStyle}
+        setStrokeStyle={setStrokeStyle}
+        roughness={roughness}
+        setRoughness={setRoughness}
+        roundness={roundness}
+        setRoundness={setRoundness}
+        opacity={opacity}
+        setOpacity={setOpacity}
+        onBack={() => router.push("/dashboard")}
+        onExportPNG={() => exportToPNG(canvasRef.current)}
+        onExportSVG={() => exportToSVG(shapes, canvasRef.current)}
       />
 
       <ZoomControls
@@ -213,36 +280,6 @@ function DrawContent() {
 
       <canvas ref={canvasRef} className="h-full w-full cursor-crosshair" />
 
-      <div className="fixed top-6 right-6 flex flex-col gap-2">
-        <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3 backdrop-blur-md">
-          <h3 className="mb-2 text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
-            Online Users
-          </h3>
-          <div className="flex flex-col gap-2">
-            {onlineUsers.map((u) => (
-              <div key={u.userId} className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                <span className="text-xs font-medium text-zinc-300">
-                  {u.name}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-        <button
-          onClick={() => exportToPNG(canvasRef.current)}
-          className="rounded-xl bg-zinc-100 px-4 py-2 text-xs font-bold text-zinc-900 transition-colors hover:bg-zinc-200"
-        >
-          Export PNG
-        </button>
-        <button
-          onClick={() => exportToSVG(shapes, canvasRef.current)}
-          className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2 text-xs font-bold text-zinc-100 transition-colors hover:bg-zinc-800"
-        >
-          Export SVG
-        </button>
-      </div>
-
       <div className="pointer-events-none fixed bottom-6 left-6 text-[10px] font-medium tracking-widest text-zinc-500 uppercase">
         Space + Drag to Pan • Scroll to Zoom
       </div>
@@ -254,14 +291,14 @@ function initDraw(
   canvas: HTMLCanvasElement,
   roomId: string,
   socket: WebSocket,
-  selectedTool: Tool,
-  zoom: number,
-  camera: { x: number; y: number },
-  currentStyle: ShapeStyle,
+  selectedToolRef: React.MutableRefObject<Tool>,
+  zoomRef: React.MutableRefObject<number>,
+  cameraRef: React.MutableRefObject<{ x: number; y: number }>,
+  currentStyleRef: React.MutableRefObject<ShapeStyle>,
   onShapesUpdate: (shapes: Shape[]) => void,
   onCameraUpdate: (zoom: number, camera: { x: number; y: number }) => void,
   onToolSelect: (tool: Tool) => void,
-  selectedShapeId: string | null,
+  selectedShapeIdRef: React.MutableRefObject<string | null>,
   setSelectedShapeId: (id: string | null) => void,
   setCollaborators: React.Dispatch<
     React.SetStateAction<Record<string, { name: string; x: number; y: number }>>
@@ -295,7 +332,13 @@ function initDraw(
     setShapes(s);
   });
 
-  socket.send(JSON.stringify({ type: "join_room", roomId }));
+  if (socket.readyState === WebSocket.OPEN) {
+    socket.send(JSON.stringify({ type: "join_room", roomId }));
+  } else {
+    socket.addEventListener("open", () => {
+      socket.send(JSON.stringify({ type: "join_room", roomId }));
+    });
+  }
 
   const onMessage = (event: MessageEvent) => {
     const message = JSON.parse(event.data);
@@ -329,21 +372,21 @@ function initDraw(
 
   const getMousePos = (e: MouseEvent) => {
     return {
-      x: (e.clientX - camera.x) / zoom,
-      y: (e.clientY - camera.y) / zoom,
+      x: (e.clientX - cameraRef.current.x) / zoomRef.current,
+      y: (e.clientY - cameraRef.current.y) / zoomRef.current,
     };
   };
 
   const render = () => {
     clearCanvas(
-      shapesRef.current,
+      shapesRef.current || [],
       canvas,
       ctx,
       rc,
-      zoom,
-      camera,
-      selectedShapeId,
-      collaboratorsRef.current
+      zoomRef.current,
+      cameraRef.current,
+      selectedShapeIdRef.current,
+      collaboratorsRef.current || {}
     );
   };
 
@@ -354,6 +397,8 @@ function initDraw(
       lastPanY = e.clientY;
       return;
     }
+
+    const selectedTool = selectedToolRef.current;
 
     if (selectedTool === "clear") {
       if (confirm("Clear entire canvas?")) {
@@ -375,13 +420,15 @@ function initDraw(
 
     if (selectedTool === "select") {
       // Check handles first
+      const selectedShapeId = selectedShapeIdRef.current;
       if (selectedShapeId) {
-        const shape = shapesRef.current.find((s) => s.id === selectedShapeId);
+        const shape = shapesRef.current?.find((s) => s.id === selectedShapeId);
         if (shape) {
           const handles = getHandles(shape);
           const handle = handles.find(
             (h) =>
-              Math.sqrt((h.x - pos.x) ** 2 + (h.y - pos.y) ** 2) < 10 / zoom
+              Math.sqrt((h.x - pos.x) ** 2 + (h.y - pos.y) ** 2) <
+              10 / zoomRef.current
           );
           if (handle) {
             resizeHandle = handle.id;
@@ -393,7 +440,7 @@ function initDraw(
         }
       }
 
-      const shape = [...shapesRef.current]
+      const shape = [...(shapesRef.current || [])]
         .reverse()
         .find((s) => isPointInShape(pos, s));
       if (shape) {
@@ -409,11 +456,11 @@ function initDraw(
     }
 
     if (selectedTool === "eraser") {
-      const shapeToDelete = shapesRef.current.find((s) =>
+      const shapeToDelete = shapesRef.current?.find((s) =>
         isPointInShape(pos, s)
       );
       if (shapeToDelete) {
-        const newShapes = shapesRef.current.filter(
+        const newShapes = (shapesRef.current || []).filter(
           (s) => s.id !== shapeToDelete.id
         );
         setShapes(newShapes);
@@ -439,9 +486,9 @@ function initDraw(
           x: pos.x,
           y: pos.y,
           text,
-          style: currentStyle,
+          style: currentStyleRef.current,
         };
-        const newShapes = [...shapesRef.current, shape];
+        const newShapes = [...(shapesRef.current || []), shape];
         setShapes(newShapes);
         onShapesUpdate(newShapes);
         socket.send(
@@ -474,13 +521,15 @@ function initDraw(
     if (!clicked) return;
     clicked = false;
     const pos = getMousePos(e);
+    const selectedTool = selectedToolRef.current;
+    const selectedShapeId = selectedShapeIdRef.current;
 
     if (selectedTool === "select" && selectedShapeId && dragStart) {
-      const movedShape = shapesRef.current.find(
+      const movedShape = shapesRef.current?.find(
         (s) => s.id === selectedShapeId
       );
       if (movedShape) {
-        onShapesUpdate(shapesRef.current);
+        onShapesUpdate(shapesRef.current || []);
         socket.send(
           JSON.stringify({
             type: "chat",
@@ -500,6 +549,7 @@ function initDraw(
 
     let shape: Shape | null = null;
     const id = Math.random().toString(36).substr(2, 9);
+    const currentStyle = currentStyleRef.current;
 
     switch (selectedTool) {
       case "rect":
@@ -572,8 +622,9 @@ function initDraw(
 
     if (!shape) return;
 
-    const newShapes = [...shapesRef.current, shape];
+    const newShapes = [...(shapesRef.current || []), shape];
     setShapes(newShapes);
+    shapesRef.current = newShapes; // Update ref immediately
     onShapesUpdate(newShapes);
 
     socket.send(
@@ -590,7 +641,10 @@ function initDraw(
     if (isPanning) {
       const dx = e.clientX - lastPanX;
       const dy = e.clientY - lastPanY;
-      onCameraUpdate(zoom, { x: camera.x + dx, y: camera.y + dy });
+      onCameraUpdate(zoomRef.current, {
+        x: cameraRef.current.x + dx,
+        y: cameraRef.current.y + dy,
+      });
       lastPanX = e.clientX;
       lastPanY = e.clientY;
       return;
@@ -598,6 +652,8 @@ function initDraw(
 
     if (clicked) {
       const pos = getMousePos(e);
+      const selectedTool = selectedToolRef.current;
+      const selectedShapeId = selectedShapeIdRef.current;
 
       if (
         selectedTool === "select" &&
@@ -609,7 +665,7 @@ function initDraw(
         const dy = pos.y - dragStart.y;
         const initialPos = initialShapePos;
 
-        const newShapes = shapesRef.current.map((s) => {
+        const newShapes = (shapesRef.current || []).map((s) => {
           if (s.id === selectedShapeId) {
             if (resizeHandle) {
               return resizeShape(s, initialPos, resizeHandle, pos);
@@ -664,6 +720,8 @@ function initDraw(
       render();
 
       ctx.save();
+      const zoom = zoomRef.current;
+      const camera = cameraRef.current;
       ctx.setTransform(zoom, 0, 0, zoom, camera.x, camera.y);
 
       const width = pos.x - startX;
@@ -737,6 +795,9 @@ function initDraw(
 
   const handleWheel = (e: WheelEvent) => {
     e.preventDefault();
+    const zoom = zoomRef.current;
+    const camera = cameraRef.current;
+
     const zoomFactor = 1.1;
     const newZoom = e.deltaY > 0 ? zoom / zoomFactor : zoom * zoomFactor;
     const clampedZoom = Math.min(Math.max(newZoom, 0.1), 10);
@@ -873,9 +934,17 @@ function clearCanvas(
       stroke: shape.style.stroke,
       strokeWidth: shape.style.strokeWidth / zoom,
       fill:
-        shape.style.fillStyle !== "hachure" ? shape.style.stroke : undefined,
+        shape.style.backgroundColor !== "transparent"
+          ? shape.style.backgroundColor
+          : undefined,
       fillStyle: shape.style.fillStyle,
-      roughness: 1,
+      roughness: shape.style.roughness,
+      strokeLineDash:
+        shape.style.strokeStyle === "dashed"
+          ? [5, 5]
+          : shape.style.strokeStyle === "dotted"
+            ? [2, 2]
+            : undefined,
     };
 
     if (shape.type === "rect") {

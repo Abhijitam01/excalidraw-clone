@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties, ReactNode } from "react";
-import { SITE } from "./lib/site";
+import { SITE } from "../lib/site";
 
 function BentoCard({
   title,
@@ -18,7 +18,7 @@ function BentoCard({
   return (
     <div
       style={style}
-      className={`group relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md animate-fade-up dark:border-zinc-800 dark:bg-zinc-950 ${className ?? ""}`}
+      className={`group animate-fade-up relative overflow-hidden rounded-3xl border border-zinc-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-zinc-800 dark:bg-zinc-950 ${className ?? ""}`}
     >
       <div className="relative">
         <div className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -40,15 +40,15 @@ export default function Home() {
     <div className="relative">
       {/* subtle background */}
       <div className="pointer-events-none absolute inset-x-0 top-[-140px] mx-auto h-[420px] max-w-6xl px-5">
-        <div className="absolute left-10 top-10 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl animate-float-slow" />
-        <div className="absolute right-10 top-24 h-56 w-56 rounded-full bg-fuchsia-500/10 blur-3xl animate-float-slow" />
+        <div className="animate-float-slow absolute top-10 left-10 h-56 w-56 rounded-full bg-indigo-500/10 blur-3xl" />
+        <div className="animate-float-slow absolute top-24 right-10 h-56 w-56 rounded-full bg-fuchsia-500/10 blur-3xl" />
       </div>
 
-      <div className="mx-auto max-w-6xl px-5 pb-16 pt-14 sm:pt-20">
+      <div className="mx-auto max-w-6xl px-5 pt-14 pb-16 sm:pt-20">
         {/* Hero: clarify purpose */}
         <section className="mx-auto max-w-3xl text-center">
           <div
-            className="mx-auto inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-700 shadow-sm animate-fade-in dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
+            className="animate-fade-in mx-auto inline-flex items-center gap-2 rounded-full border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-700 shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-300"
             style={{ animationDelay: "50ms" }}
           >
             <span className="font-medium">Draw</span>
@@ -56,22 +56,22 @@ export default function Home() {
             <span>hand-drawn diagrams & quick sketches</span>
           </div>
           <h1
-            className="mt-6 text-balance text-4xl font-semibold leading-tight tracking-tight animate-fade-up sm:text-6xl"
+            className="animate-fade-up mt-6 text-4xl leading-tight font-semibold tracking-tight text-balance sm:text-6xl"
             style={{ animationDelay: "120ms" }}
           >
             A minimal whiteboard for thinking out loud.
           </h1>
 
           <p
-            className="mx-auto mt-5 max-w-2xl text-pretty text-base leading-7 text-zinc-600 animate-fade-up dark:text-zinc-300"
+            className="animate-fade-up mx-auto mt-5 max-w-2xl text-base leading-7 text-pretty text-zinc-600 dark:text-zinc-300"
             style={{ animationDelay: "180ms" }}
           >
-            {SITE.name} is an Excalidraw-style drawing app. Use it to sketch flows,
-            wireframes, and ideas — fast.
+            {SITE.name} is an Excalidraw-style drawing app. Use it to sketch
+            flows, wireframes, and ideas — fast.
           </p>
 
           <div
-            className="mt-8 flex flex-wrap items-center justify-center gap-3 animate-fade-up"
+            className="animate-fade-up mt-8 flex flex-wrap items-center justify-center gap-3"
             style={{ animationDelay: "240ms" }}
           >
             <Link
@@ -89,7 +89,7 @@ export default function Home() {
           </div>
 
           <div
-            className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-zinc-600 animate-fade-up dark:text-zinc-400"
+            className="animate-fade-up mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-zinc-600 dark:text-zinc-400"
             style={{ animationDelay: "300ms" }}
           >
             <span>Shapes</span>
