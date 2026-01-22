@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Start HTTP Backend
-echo "Starting HTTP Backend on port 3002..."
-cd apps/http-backend && PORT=3002 node dist/index.js &
+echo "Starting HTTP Backend on port 3001..."
+cd apps/http-backend && PORT=3001 node dist/index.js &
 HTTP_PID=$!
 
 # Start WebSocket Backend  
